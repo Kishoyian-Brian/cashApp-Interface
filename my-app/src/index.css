@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Add safe area support for mobile devices */
+@supports (padding: max(0px)) {
+  .safe-area-pb {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Prevent horizontal scrolling on mobile */
+html, body {
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Improve touch targets on mobile */
+@media (max-width: 767px) {
+  button, input[type="checkbox"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Exception for small buttons that are part of larger touch areas */
+  .keypad button, .tab-bar button {
+    min-height: auto;
+    min-width: auto;
+  }
+}
+
+/* Smooth scrolling for better UX */
+* {
+  scroll-behavior: smooth;
+}

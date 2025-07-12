@@ -36,9 +36,10 @@ const mockUsers: User[] = [
   { name: 'Isabella Lewis', cashtag: '$isabellalewis', avatar: 'I', color: '#9b59b6' }
 ];
 
-const CashAppIcon = ({ size = "w-10 h-10" }) => (
-  <div className={`${size} bg-[#00d54b] rounded-lg flex items-center justify-center`}>
-    <span className="text-white text-3xl font-bold" style={{fontFamily: 'sans-serif'}}>$</span>
+// Restore the original CashAppIcon component:
+const CashAppIcon = ({ size = "w-10 h-10", color = "#00d54b", dollarColor = "#fff" }) => (
+  <div className={`${size} rounded-full flex items-center justify-center`} style={{ backgroundColor: color }}>
+    <span className="text-3xl font-bold" style={{fontFamily: 'sans-serif', color: dollarColor}}>$</span>
   </div>
 );
 
@@ -389,8 +390,14 @@ function App() {
         <div className="text-center text-xs sm:text-sm min-w-0 flex-1">
           <div className="font-semibold">{formatBalanceShort(balance)}</div>
         </div>
+        <div className="text-center text-xs sm:text-sm cursor-pointer min-w-0 flex-1 active:scale-95 transition-transform">
+          <svg className="w-5 h-5 mx-auto text-gray-700" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <rect x="2" y="7" width="20" height="10" rx="2" />
+            <path d="M16 11h2a2 2 0 0 1 0 4h-2" />
+          </svg>
+        </div>
         <div className="text-center text-xs sm:text-sm cursor-pointer min-w-0 flex-1 active:scale-95 transition-transform" onClick={() => setDollarModal(true)}>
-          <div className="text-xl sm:text-2xl">$</div>
+          <div className="text-xl sm:text-2xl text-gray-700 font-bold">$</div>
         </div>
         <div className="text-center text-xs sm:text-sm cursor-pointer min-w-0 flex-1 active:scale-95 transition-transform" onClick={() => setSearchModal(true)}>
           <Search className="w-4 h-4 sm:w-5 sm:h-5 mx-auto" />
@@ -693,12 +700,21 @@ function App() {
                   }`}
                   onClick={() => setSelectedUser(selectedUser?.cashtag === user.cashtag ? null : user)}
                 >
-                  <input
-                    type="checkbox"
-                    checked={selectedUser?.cashtag === user.cashtag}
-                    onChange={() => {}}
-                    className="w-4 h-4 sm:w-5 sm:h-5 rounded border-2 border-gray-600 bg-transparent checked:bg-green-500 checked:border-green-500"
-                  />
+                  <label className="relative flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedUser?.cashtag === user.cashtag}
+                      onChange={() => {}}
+                      className="appearance-none w-3 h-3 border-2 border-gray-400 rounded bg-transparent checked:bg-[#36d24a] checked:border-[#36d24a] transition-all"
+                    />
+                    {selectedUser?.cashtag === user.cashtag && (
+                      <span className="absolute left-0 top-0 w-3 h-3 flex items-center justify-center pointer-events-none">
+                        <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </span>
+                    )}
+                  </label>
                   <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm" style={{ backgroundColor: user.color }}>
                     {user.avatar}
                   </div>
@@ -716,50 +732,52 @@ function App() {
 
       {/* Success Modal */}
       {successModal && (
-        <div className="fixed inset-0 bg-white z-50 flex flex-col h-full min-h-screen relative">
-          {/* Top bar */}
-          <div className="flex items-center justify-between px-4 pt-6">
-            <button onClick={() => setSuccessModal(false)} className="text-2xl text-black font-bold">
-              ←
-            </button>
-            <div className="flex-1" />
-            <div className="text-3xl text-gray-400 font-bold">⋯</div>
-          </div>
-          <button
-            onClick={() => setSuccessModal(false)}
-            className="text-2xl text-black font-bold absolute top-6 right-6"
-            aria-label="Close"
-          >
-            ×
-          </button>
-          {/* Main content, stretched */}
-          <div className="flex flex-col flex-1 justify-between items-center w-full">
-            {/* Top section */}
-            <div className="flex flex-col items-center mt-10">
-              <div className="w-16 h-16 rounded-full bg-[#36d24a] flex items-center justify-center mb-6">
-                <span className="text-white text-3xl font-bold">$</span>
-              </div>
-              <div className="text-xl font-bold mb-1">{successType === 'cashOut' ? 'Cash Out' : 'Add Cash'}</div>
-              <div className="text-gray-500 mb-1 text-base">{successType === 'cashOut' ? 'To Chase Bank' : 'From Visa Debit 9054'}</div>
-            </div>
-            {/* Middle section */}
-            <div className="flex flex-col items-center flex-1 justify-center w-full">
-              <div className="text-5xl font-extrabold text-black mb-3">
-                {formatBalance(parseFloat(successAmount))}
-              </div>
-              <div className="text-gray-500 text-lg">
-                Today at {new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
-              </div>
-            </div>
-            {/* Bottom button */}
-            <div className="w-full px-6 pb-10">
-              <button
-                onClick={() => setSuccessModal(false)}
-                className="w-full bg-[#36d24a] hover:bg-[#2bb03b] text-white py-4 rounded-full font-semibold text-lg flex items-center justify-center gap-2 transition-all"
-              >
-                <Check className="w-6 h-6" />
-                {successType === 'cashOut' ? 'Completed' : 'Completed'}
+        <div className="fixed inset-0 bg-white z-50 flex items-center justify-center">
+          <div className="flex flex-col flex-1 justify-between items-center w-full h-full min-h-screen relative">
+            {/* Top bar */}
+            <div className="flex items-center justify-between px-4 pt-6 w-full">
+              <button onClick={() => setSuccessModal(false)} className="text-2xl text-black font-bold">
+                ←
               </button>
+              <div className="flex-1" />
+              <div className="text-3xl text-gray-400 font-bold">⋯</div>
+            </div>
+            <button
+              onClick={() => setSuccessModal(false)}
+              className="text-2xl text-black font-bold absolute top-6 right-6"
+              aria-label="Close"
+            >
+              ×
+            </button>
+            {/* Main content, stretched */}
+            <div className="flex flex-col flex-1 justify-between items-center w-full">
+              {/* Top section */}
+              <div className="flex flex-col items-center mt-10">
+                <div className="w-16 h-16 rounded-full bg-[#36d24a] flex items-center justify-center mb-6">
+                  <span className="text-white text-3xl font-bold">$</span>
+                </div>
+                <div className="text-xl font-bold mb-1">{successType === 'cashOut' ? 'Cash Out' : 'Add Cash'}</div>
+                <div className="text-gray-500 mb-1 text-base">{successType === 'cashOut' ? 'To Chase Bank' : 'From Visa Debit 9054'}</div>
+              </div>
+              {/* Middle section */}
+              <div className="flex flex-col items-center flex-1 justify-center w-full">
+                <div className="text-5xl font-extrabold text-black mb-3">
+                  {formatBalance(parseFloat(successAmount))}
+                </div>
+                <div className="text-gray-500 text-lg">
+                  Today at {new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                </div>
+              </div>
+              {/* Bottom button */}
+              <div className="w-full px-6 pb-10">
+                <button
+                  onClick={() => setSuccessModal(false)}
+                  className="w-full bg-[#36d24a] hover:bg-[#2bb03b] text-white py-4 rounded-full font-semibold text-lg flex items-center justify-center gap-2 transition-all"
+                >
+                  <Check className="w-6 h-6" />
+                  {successType === 'cashOut' ? 'Completed' : 'Completed'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -779,21 +797,33 @@ function App() {
       {/* Confirmation Modal */}
       {confirmationModal && selectedUser && (
         <div className="fixed inset-0 bg-gray-900 z-50 flex items-center justify-center p-4">
-          <div className="text-white text-center p-6 sm:p-8 w-full max-w-sm">
-            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-full mb-4 mx-auto flex items-center justify-center text-white font-bold text-lg sm:text-xl" style={{ backgroundColor: selectedUser.color }}>
-              {selectedUser.avatar}
+          <div className="text-white text-center p-6 sm:p-8 w-full max-w-sm flex flex-col h-full min-h-[70vh] justify-between">
+            {/* 2. Top bar (optional, e.g. close button) */}
+            <div className="flex items-center justify-between mb-4">
+              <button onClick={() => setConfirmationModal(false)} className="text-2xl font-bold">←</button>
+              <div className="flex-1" />
+              <div className="text-3xl text-gray-400 font-bold">⋯</div>
             </div>
-            <div className="text-xl sm:text-2xl font-bold mb-1">{selectedUser.name}</div>
-            <div className="text-gray-400 mb-6 sm:mb-8 text-sm sm:text-base">Payment to {selectedUser.cashtag}</div>
-            <div className="text-3xl sm:text-4xl font-bold mb-3">{lastDollarAmount}</div>
-            <div className="text-gray-400 mb-8 sm:mb-10 text-sm sm:text-base">
-              Today at {new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+            {/* 3. Top section: avatar, user, payment to */}
+            <div className="flex flex-col items-center mb-6">
+              <div className="w-16 h-16 rounded-full mb-4 mx-auto flex items-center justify-center text-white font-bold text-lg sm:text-xl" style={{ backgroundColor: selectedUser.color }}>
+                {selectedUser.avatar}
+              </div>
+              <div className="text-xl sm:text-2xl font-bold mb-1">{selectedUser.name}</div>
+              <div className="text-gray-400 text-sm sm:text-base">Payment to {selectedUser.cashtag}</div>
             </div>
-            
+            {/* 4. Main content: amount and date centered */}
+            <div className="flex flex-col items-center flex-1 justify-center">
+              <div className="text-3xl sm:text-4xl font-bold mb-3">{lastDollarAmount}</div>
+              <div className="text-gray-400 mb-8 sm:mb-10 text-sm sm:text-base">
+                Today at {new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+              </div>
+            </div>
+            {/* 5. Button group */}
             <div className="space-y-3 sm:space-y-4 w-full">
               <button
                 onClick={() => setConfirmationModal(false)}
-                className="w-full bg-green-500 hover:bg-green-600 active:bg-green-700 text-white py-3 sm:py-4 rounded-full font-semibold text-base sm:text-lg flex items-center justify-center gap-2 transition-all"
+                className="w-full bg-[#36d24a] hover:bg-[#2bb03b] text-white py-3 sm:py-4 rounded-full font-semibold text-base sm:text-lg flex items-center justify-center gap-2 transition-all"
               >
                 <Check className="w-5 h-5 sm:w-6 sm:h-6" />
                 Completed
